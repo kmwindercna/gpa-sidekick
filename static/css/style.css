@@ -9,10 +9,20 @@ html, body {
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+    "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Twemoji Mozilla", "EmojiOne Color",
+    sans-serif;
   -webkit-user-select: none;
   user-select: none;
   cursor: none;
+}
+
+/* Force any element that displays emoji to prefer color emoji fonts. */
+.fday-emoji, #cur-emoji, .dw-emoji, .secret-emoji, #sparkles .fx {
+  font-family:
+    "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+    "Twemoji Mozilla", "EmojiOne Color", sans-serif;
 }
 
 #app {
@@ -373,6 +383,244 @@ body.fx-confetti #sparkles .fx {
   90% { opacity: 1; }
   100% { transform: translate3d(60px, 510px, 0) rotate(720deg); opacity: 0; }
 }
+
+/* ====================================================================
+   TAPPABLE CUES (home view)
+   ==================================================================== */
+#news-panel, .event:not(.empty), .fday, #cur-weather {
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.event:not(.empty):active { background: var(--border); border-radius: 6px; }
+.fday:active { transform: scale(0.94); }
+#news-panel:active { background: var(--border); }
+
+/* ====================================================================
+   DETAIL VIEW (full-screen overlay over the home dashboard)
+   ==================================================================== */
+#detail-view {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  color: var(--text);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 6px;
+  gap: 8px;
+  animation: detail-slide-in 0.2s ease-out;
+}
+#detail-view.hidden { display: none; }
+@keyframes detail-slide-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+#detail-back {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 0 var(--border);
+}
+#detail-back:active { transform: translateY(1px); box-shadow: none; }
+#detail-title {
+  font-size: 17px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#detail-nav { display: flex; gap: 6px; }
+#detail-nav button {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#detail-nav button:active { background: var(--border); }
+
+#detail-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* Inactivity countdown — thin bar at the very bottom */
+#detail-timer {
+  height: 3px;
+  background: var(--accent);
+  width: 100%;
+  transform-origin: left center;
+  transition: transform linear;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* --- News detail --- */
+.dn-image {
+  width: 100%;
+  height: 220px;
+  background: center/cover no-repeat var(--surface);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.dn-image.no-image { display: none; }
+.dn-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.dn-source {
+  color: var(--accent);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+}
+.dn-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+.dn-summary {
+  font-size: 15px;
+  color: var(--subtle);
+  line-height: 1.45;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.dn-summary:empty::before {
+  content: "(no preview available — full article not included on the dashboard)";
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* --- Weather detail --- */
+.dw-day {
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 800;
+  text-align: center;
+}
+.dw-condition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 4px;
+}
+.dw-emoji { font-size: 92px; line-height: 1; }
+.dw-cond-text { font-size: 22px; color: var(--text); font-weight: 600; }
+.dw-temps {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 6px;
+}
+.dw-temp { display: flex; flex-direction: column; align-items: center; }
+.dw-temp .lab {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.dw-temp .val { font-size: 50px; font-weight: 800; line-height: 1; }
+.dw-temp.high .val { color: var(--warm); }
+.dw-temp.low  .val { color: var(--cool); }
+.dw-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+.dw-stat {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.dw-stat .lab {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.dw-stat .val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+.dw-stat .val.warm { color: var(--warm); }
+.dw-stat .val.cool { color: var(--cool); }
+
+/* --- Event detail --- */
+.de-day {
+  font-size: 17px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.de-time {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--warm);
+  margin-top: 4px;
+}
+.de-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-top: 12px;
+}
+.de-location {
+  font-size: 18px;
+  color: var(--subtle);
+  margin-top: 14px;
+}
+.de-location::before { content: "📍 "; }
+.de-tag {
+  display: inline-block;
+  font-size: 12px;
+  background: var(--good);
+  color: var(--bg);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+.de-tag.holiday { background: var(--good-strong); }
+.de-tag.birthday { background: var(--warm); }
 
 /* ====================================================================
    SECRET TAP MENU

@@ -73,6 +73,17 @@
     <div id="status-bar"></div>
   </div>
 
+  <!-- Detail view (overlays home; populated dynamically) -->
+  <div id="detail-view" class="hidden" role="dialog">
+    <div class="detail-header">
+      <button id="detail-back" type="button">← Home</button>
+      <div id="detail-title"></div>
+      <div id="detail-nav"></div>
+    </div>
+    <div id="detail-body"></div>
+    <div id="detail-timer" aria-hidden="true"></div>
+  </div>
+
   <!-- Seasonal sparkles overlay (positioned absolutely; never blocks taps) -->
   <div id="sparkles" aria-hidden="true"></div>
 

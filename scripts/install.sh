@@ -14,6 +14,9 @@ sudo apt-get update
 # chromium-browser on Bullseye, chromium on Bookworm — install whichever is available.
 sudo apt-get install -y python3 python3-venv python3-pip unclutter curl
 sudo apt-get install -y chromium-browser 2>/dev/null || sudo apt-get install -y chromium
+# Color emoji font — without this, Chromium renders weather/holiday emoji as blank boxes.
+sudo apt-get install -y fonts-noto-color-emoji
+fc-cache -f >/dev/null 2>&1 || true
 
 echo "==> Creating Python virtualenv at $REPO_DIR/.venv"
 python3 -m venv "$REPO_DIR/.venv"

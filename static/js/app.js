@@ -2,7 +2,7 @@
 const REFRESH_MS = 5 * 60 * 1000;        // refetch APIs every 5 min
 const NEWS_ROTATE_MS = 12 * 1000;        // rotate news every 12 sec
 const CLOCK_MS = 1000;
-const GREETING_REROLL_MS = 60 * 1000;    // pick a new name every minute
+const DETAIL_AUTO_HOME_MS = 45 * 1000;   // auto-return home after 45s of no touch
 
 const CFG = window.__GPS_CONFIG__ || {};
 const NAMES = (CFG.names && CFG.names.length) ? CFG.names : ["Friend"];
@@ -14,9 +14,16 @@ const DAY_NAMES_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const MONTH_NAMES_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-let newsItems = [];     // mix of regular news + on-this-day + birthday slides
+let newsItems = [];
 let newsIdx = 0;
+let weatherData = null;
 let currentThemeName = "";
+let birthdaysToday = [];
+
+// View state — "home" or "detail" (when detail is open)
+let currentView = "home";
+let detailContext = null;       // { kind, idx, payload } for the active detail
+let inactivityTimer = null;
 
 // =====================================================================
 // CLOCK + GREETING
@@ -43,7 +50,6 @@ function updateClock() {
   document.getElementById("date").textContent =
     `${DAY_NAMES_LONG[now.getDay()]}, ${MONTH_NAMES[now.getMonth()]} ${now.getDate()}`;
 
-  // Refresh greeting periodically (random name + time-of-day phrase).
   if (now.getMinutes() !== lastGreetingMinute) {
     lastGreetingMinute = now.getMinutes();
     document.getElementById("greeting").textContent =
@@ -51,9 +57,6 @@ function updateClock() {
   }
 }
 
-// =====================================================================
-// CALENDAR + HOLIDAYS + BIRTHDAYS (combined list)
-// =====================================================================
 function fmtEventTime(iso, allDay) {
   if (allDay) return "All Day";
   const d = new Date(iso);
@@ -72,11 +75,23 @@ function dayLabel(date) {
   const d = new Date(date); d.setHours(0,0,0,0);
   if (d.getTime() === today.getTime()) return "Today";
   if (d.getTime() === tomorrow.getTime()) return "Tomorrow";
-  return `${DAY_NAMES_SHORT[d.getDay()]}, ${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return `${DAY_NAMES_LONG[d.getDay()]}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+}
+function fmtPublished(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const now = new Date();
+  const diffMin = Math.floor((now - d) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  if (diffMin < 24 * 60) return `${Math.floor(diffMin / 60)}h ago`;
+  return `${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`;
 }
 
-let birthdaysToday = [];
-
+// =====================================================================
+// CALENDAR + HOLIDAYS + BIRTHDAYS
+// =====================================================================
 async function loadCalendar() {
   try {
     const [calRes, holRes, bdRes] = await Promise.all([
@@ -90,6 +105,7 @@ async function loadCalendar() {
       items.push({
         type: "event",
         summary: e.summary,
+        location: e.location || "",
         start: e.start,
         all_day: e.all_day,
       });
@@ -98,6 +114,7 @@ async function loadCalendar() {
       items.push({
         type: "holiday",
         summary: h.name,
+        location: "",
         start: h.date + "T00:00:00",
         all_day: true,
       });
@@ -106,6 +123,7 @@ async function loadCalendar() {
       items.push({
         type: "birthday",
         summary: `${b.name}'s Birthday`,
+        location: "",
         start: b.date + "T00:00:00",
         all_day: true,
       });
@@ -149,6 +167,7 @@ async function loadCalendar() {
       sum.textContent = item.summary;
       ev.appendChild(time);
       ev.appendChild(sum);
+      ev.addEventListener("click", () => openDetail("event", { item }));
       list.appendChild(ev);
       shown++;
     }
@@ -175,34 +194,36 @@ async function loadNews() {
     ]);
     const items = [];
 
-    // Inject a birthday celebration slide (front of rotation) if today is one.
     for (const b of birthdaysToday) {
       items.push({
         kind: "birthday",
         source: "🎂 Today",
         title: `Happy Birthday, ${b.name}!`,
+        summary: "",
         image: null,
       });
     }
 
-    // On This Day in history (if available).
     const otd = (otdRes && otdRes.event) || null;
     if (otd && otd.text) {
       items.push({
         kind: "otd",
         source: otd.year ? `On This Day · ${otd.year}` : "On This Day",
         title: otd.text,
+        summary: "",
         image: otd.image || null,
+        year: otd.year || null,
       });
     }
 
-    // Regular news.
     for (const n of (newsRes.items || [])) {
       items.push({
         kind: "news",
         source: n.source,
         title: n.title,
+        summary: n.summary || "",
         image: n.image,
+        published: n.published,
       });
     }
 
@@ -267,19 +288,19 @@ function rotateNews() {
 async function loadWeather() {
   try {
     const res = await fetch("/api/weather").then(r => r.json());
-    const data = res.data;
-    if (!data) return;
+    weatherData = res.data;
+    if (!weatherData) return;
 
-    document.getElementById("cur-temp").textContent  = `${data.current.temp}°`;
-    document.getElementById("cur-emoji").textContent = data.current.emoji;
+    document.getElementById("cur-temp").textContent  = `${weatherData.current.temp}°`;
+    document.getElementById("cur-emoji").textContent = weatherData.current.emoji;
     const labelEl = document.getElementById("cur-label");
     if (labelEl && labelEl.textContent.trim() === "") {
-      labelEl.textContent = data.current.label;
+      labelEl.textContent = weatherData.current.label;
     }
 
     const daysEl = document.getElementById("forecast-days");
     daysEl.innerHTML = "";
-    (data.daily || []).forEach((d, i) => {
+    (weatherData.daily || []).forEach((d, i) => {
       const dt = new Date(d.date + "T12:00:00");
       const fd = document.createElement("div");
       fd.className = "fday";
@@ -298,6 +319,7 @@ async function loadWeather() {
         <div class="fday-emoji">${d.emoji}</div>
         <div class="fday-temps"><span class="fday-high">${d.high}°</span><span class="fday-low">${d.low}°</span></div>
       `;
+      fd.addEventListener("click", () => openDetail("weather", { dayIdx: i }));
       daysEl.appendChild(fd);
     });
   } catch (e) {
@@ -317,7 +339,7 @@ async function loadQuote() {
 }
 
 // =====================================================================
-// THEME (status bar label)
+// THEME
 // =====================================================================
 async function loadTheme() {
   try {
@@ -331,38 +353,18 @@ async function loadTheme() {
 // =====================================================================
 function applySeasonalEffect() {
   const now = new Date();
-  const month = now.getMonth() + 1;  // 1-12
+  const month = now.getMonth() + 1;
   const day   = now.getDate();
   document.body.classList.remove(
     "fx-snow", "fx-leaves", "fx-hearts", "fx-fireworks", "fx-confetti"
   );
 
-  let kind = null;
-  let chars = [];
-  let count = 0;
-
-  // Birthday confetti takes top priority.
-  if (birthdaysToday.length) {
-    kind = "fx-confetti";
-    chars = ["🎉", "🎊", "🎈", "🎂", "✨"];
-    count = 14;
-  } else if (month === 12) {
-    kind = "fx-snow";
-    chars = ["❄", "❄️", "❅", "❆"];
-    count = 14;
-  } else if (month === 10) {
-    kind = "fx-leaves";
-    chars = ["🍂", "🍁", "🌰"];
-    count = 10;
-  } else if (month === 2 && day === 14) {
-    kind = "fx-hearts";
-    chars = ["❤️", "💕", "💖", "💗"];
-    count = 12;
-  } else if (month === 7 && day === 4) {
-    kind = "fx-fireworks";
-    chars = ["✨", "🎆", "🎇"];
-    count = 8;
-  }
+  let kind = null, chars = [], count = 0;
+  if (birthdaysToday.length) { kind = "fx-confetti"; chars = ["🎉","🎊","🎈","🎂","✨"]; count = 14; }
+  else if (month === 12)             { kind = "fx-snow";    chars = ["❄","❄️","❅","❆"];  count = 14; }
+  else if (month === 10)             { kind = "fx-leaves";  chars = ["🍂","🍁","🌰"];      count = 10; }
+  else if (month === 2 && day === 14) { kind = "fx-hearts";  chars = ["❤️","💕","💖","💗"]; count = 12; }
+  else if (month === 7 && day === 4)  { kind = "fx-fireworks"; chars = ["✨","🎆","🎇"];   count = 8;  }
 
   const wrap = document.getElementById("sparkles");
   wrap.innerHTML = "";
@@ -374,12 +376,243 @@ function applySeasonalEffect() {
     span.className = "fx";
     span.textContent = chars[Math.floor(Math.random() * chars.length)];
     span.style.left = Math.floor(Math.random() * 800) + "px";
-    const duration = 8 + Math.random() * 14;     // 8-22s
-    const delay    = -Math.random() * duration;  // start mid-cycle
+    const duration = 8 + Math.random() * 14;
+    const delay    = -Math.random() * duration;
     span.style.animationDuration = duration.toFixed(2) + "s";
     span.style.animationDelay = delay.toFixed(2) + "s";
     span.style.fontSize = (16 + Math.random() * 14).toFixed(0) + "px";
     wrap.appendChild(span);
+  }
+}
+
+// =====================================================================
+// DETAIL VIEW (news / weather / event)
+// =====================================================================
+function openDetail(kind, payload) {
+  currentView = "detail";
+  detailContext = { kind, payload };
+  // For news: lock the current news index so back/forward navigation works.
+  if (kind === "news-current") {
+    detailContext = { kind: "news", payload: { idx: newsIdx % Math.max(newsItems.length, 1) } };
+  }
+  renderDetail();
+  document.getElementById("detail-view").classList.remove("hidden");
+  resetInactivityTimer();
+}
+
+function closeDetail() {
+  currentView = "home";
+  detailContext = null;
+  document.getElementById("detail-view").classList.add("hidden");
+  clearInactivityTimer();
+}
+
+function clearInactivityTimer() {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+  const bar = document.getElementById("detail-timer");
+  bar.style.transition = "none";
+  bar.style.transform = "scaleX(1)";
+}
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  const bar = document.getElementById("detail-timer");
+  bar.style.transition = "none";
+  bar.style.transform = "scaleX(1)";
+  // next frame, animate to zero over the timeout window
+  requestAnimationFrame(() => {
+    bar.style.transition = `transform ${DETAIL_AUTO_HOME_MS}ms linear`;
+    bar.style.transform = "scaleX(0)";
+  });
+  inactivityTimer = setTimeout(closeDetail, DETAIL_AUTO_HOME_MS);
+}
+
+function renderDetail() {
+  const titleEl = document.getElementById("detail-title");
+  const navEl   = document.getElementById("detail-nav");
+  const bodyEl  = document.getElementById("detail-body");
+  navEl.innerHTML = "";
+  bodyEl.innerHTML = "";
+  if (!detailContext) return;
+
+  const { kind, payload } = detailContext;
+
+  if (kind === "news") {
+    renderNewsDetail(payload, titleEl, navEl, bodyEl);
+  } else if (kind === "weather") {
+    renderWeatherDetail(payload, titleEl, bodyEl);
+  } else if (kind === "event") {
+    renderEventDetail(payload, titleEl, bodyEl);
+  }
+}
+
+function renderNewsDetail(payload, titleEl, navEl, bodyEl) {
+  const idx = ((payload.idx % newsItems.length) + newsItems.length) % newsItems.length;
+  const item = newsItems[idx];
+  if (!item) {
+    titleEl.textContent = "News";
+    bodyEl.textContent = "No news loaded.";
+    return;
+  }
+
+  titleEl.textContent = item.source || "News";
+
+  // Prev / Next buttons
+  const prev = document.createElement("button");
+  prev.type = "button";
+  prev.textContent = "‹ Prev";
+  prev.addEventListener("click", (e) => {
+    e.stopPropagation();
+    detailContext.payload.idx = (idx - 1 + newsItems.length) % newsItems.length;
+    renderDetail();
+    resetInactivityTimer();
+  });
+  const next = document.createElement("button");
+  next.type = "button";
+  next.textContent = "Next ›";
+  next.addEventListener("click", (e) => {
+    e.stopPropagation();
+    detailContext.payload.idx = (idx + 1) % newsItems.length;
+    renderDetail();
+    resetInactivityTimer();
+  });
+  if (newsItems.length > 1) {
+    navEl.appendChild(prev);
+    navEl.appendChild(next);
+  }
+
+  if (item.image) {
+    const img = document.createElement("div");
+    img.className = "dn-image";
+    img.style.backgroundImage = `url('${item.image.replace(/'/g, "\\'")}')`;
+    bodyEl.appendChild(img);
+  }
+
+  const meta = document.createElement("div");
+  meta.className = "dn-meta";
+  const src = document.createElement("span");
+  src.className = "dn-source";
+  src.textContent = item.source || "";
+  meta.appendChild(src);
+  if (item.published) {
+    const pub = document.createElement("span");
+    pub.textContent = fmtPublished(item.published);
+    meta.appendChild(pub);
+  }
+  bodyEl.appendChild(meta);
+
+  const t = document.createElement("div");
+  t.className = "dn-title";
+  t.textContent = item.title || "";
+  bodyEl.appendChild(t);
+
+  const s = document.createElement("div");
+  s.className = "dn-summary";
+  s.textContent = item.summary || "";
+  bodyEl.appendChild(s);
+}
+
+function renderWeatherDetail(payload, titleEl, bodyEl) {
+  if (!weatherData || !weatherData.daily) {
+    titleEl.textContent = "Weather";
+    bodyEl.textContent = "Weather not loaded.";
+    return;
+  }
+  const idx = Math.max(0, Math.min(payload.dayIdx, weatherData.daily.length - 1));
+  const day = weatherData.daily[idx];
+  const dt = new Date(day.date + "T12:00:00");
+  const isToday = idx === 0;
+
+  titleEl.textContent = isToday
+    ? `Today · ${MONTH_NAMES[dt.getMonth()]} ${dt.getDate()}`
+    : `${DAY_NAMES_LONG[dt.getDay()]} · ${MONTH_NAMES[dt.getMonth()]} ${dt.getDate()}`;
+
+  const dayEl = document.createElement("div");
+  dayEl.className = "dw-day";
+  dayEl.textContent = isToday ? "Today's Forecast" : DAY_NAMES_LONG[dt.getDay()];
+  bodyEl.appendChild(dayEl);
+
+  const cond = document.createElement("div");
+  cond.className = "dw-condition";
+  cond.innerHTML = `
+    <span class="dw-emoji">${day.emoji}</span>
+    <span class="dw-cond-text">${day.label}</span>
+  `;
+  bodyEl.appendChild(cond);
+
+  const temps = document.createElement("div");
+  temps.className = "dw-temps";
+  temps.innerHTML = `
+    <div class="dw-temp high"><div class="lab">High</div><div class="val">${day.high}°</div></div>
+    <div class="dw-temp low"><div class="lab">Low</div><div class="val">${day.low}°</div></div>
+  `;
+  bodyEl.appendChild(temps);
+
+  const meta = document.createElement("div");
+  meta.className = "dw-meta-grid";
+  const precip = (day.precip_chance == null) ? "—" : `${day.precip_chance}%`;
+  if (isToday && weatherData.current) {
+    const c = weatherData.current;
+    meta.innerHTML = `
+      <div class="dw-stat"><div class="lab">Right Now</div><div class="val">${c.temp}°</div></div>
+      <div class="dw-stat"><div class="lab">Feels Like</div><div class="val">${c.feels_like}°</div></div>
+      <div class="dw-stat"><div class="lab">Rain Chance</div><div class="val cool">${precip}</div></div>
+      <div class="dw-stat"><div class="lab">Humidity</div><div class="val">${c.humidity != null ? c.humidity + "%" : "—"}</div></div>
+      <div class="dw-stat"><div class="lab">Wind</div><div class="val">${c.wind} mph</div></div>
+      <div class="dw-stat"><div class="lab">Conditions</div><div class="val" style="font-size:14px;line-height:1.3">${c.label}</div></div>
+    `;
+  } else {
+    meta.innerHTML = `
+      <div class="dw-stat"><div class="lab">High</div><div class="val warm">${day.high}°</div></div>
+      <div class="dw-stat"><div class="lab">Low</div><div class="val cool">${day.low}°</div></div>
+      <div class="dw-stat"><div class="lab">Rain Chance</div><div class="val cool">${precip}</div></div>
+    `;
+  }
+  bodyEl.appendChild(meta);
+}
+
+function renderEventDetail(payload, titleEl, bodyEl) {
+  const item = payload.item;
+  if (!item) {
+    titleEl.textContent = "Event";
+    bodyEl.textContent = "No event selected.";
+    return;
+  }
+  titleEl.textContent =
+    item.type === "holiday"  ? "Holiday"  :
+    item.type === "birthday" ? "Birthday" :
+    "Calendar Event";
+
+  const dayEl = document.createElement("div");
+  dayEl.className = "de-day";
+  dayEl.textContent = dayLabel(item.start);
+  bodyEl.appendChild(dayEl);
+
+  const timeEl = document.createElement("div");
+  timeEl.className = "de-time";
+  timeEl.textContent = fmtEventTime(item.start, item.all_day);
+  bodyEl.appendChild(timeEl);
+
+  if (item.type !== "event") {
+    const tag = document.createElement("span");
+    tag.className = `de-tag ${item.type}`;
+    tag.textContent = item.type === "birthday" ? "Birthday 🎂" : "Holiday 🎉";
+    bodyEl.appendChild(tag);
+  }
+
+  const titleRow = document.createElement("div");
+  titleRow.className = "de-title";
+  titleRow.textContent = item.summary;
+  bodyEl.appendChild(titleRow);
+
+  if (item.location) {
+    const loc = document.createElement("div");
+    loc.className = "de-location";
+    loc.textContent = item.location;
+    bodyEl.appendChild(loc);
   }
 }
 
@@ -393,7 +626,8 @@ function setupSecretTap() {
   const meta  = document.getElementById("secret-meta");
 
   let taps = [];
-  function recordTap() {
+  function recordTap(e) {
+    e.stopPropagation();
     const now = Date.now();
     taps = taps.filter(t => now - t < 3000);
     taps.push(now);
@@ -403,7 +637,6 @@ function setupSecretTap() {
     }
   }
   clock.addEventListener("click", recordTap);
-  clock.addEventListener("touchstart", recordTap);
 
   async function openSecretMenu() {
     note.textContent = ABOUT_NOTE;
@@ -429,7 +662,6 @@ function setupSecretTap() {
   }
   function closeMenu() { menu.classList.add("hidden"); }
   menu.addEventListener("click", closeMenu);
-  menu.addEventListener("touchstart", closeMenu);
 }
 
 // =====================================================================
@@ -437,12 +669,13 @@ function setupSecretTap() {
 // =====================================================================
 async function loadAll() {
   await Promise.all([loadCalendar(), loadWeather(), loadQuote(), loadTheme()]);
-  // News depends on birthdaysToday from loadCalendar().
   await loadNews();
   applySeasonalEffect();
   document.getElementById("status-bar").textContent =
     `Updated ${new Date().toLocaleTimeString()}` +
     (currentThemeName ? ` · ${currentThemeName}` : "");
+  // If detail view is open with stale data, re-render with fresh data.
+  if (currentView === "detail") renderDetail();
 }
 
 loadAll();
@@ -451,9 +684,26 @@ setInterval(loadAll, REFRESH_MS);
 updateClock();
 setInterval(updateClock, CLOCK_MS);
 
-setInterval(rotateNews, NEWS_ROTATE_MS);
+// News auto-rotation only fires on the home view.
+setInterval(() => { if (currentView === "home") rotateNews(); }, NEWS_ROTATE_MS);
 
-document.getElementById("news-panel").addEventListener("click", rotateNews);
+// Tap the news panel to open detail for the currently visible item.
+document.getElementById("news-panel").addEventListener("click", () => {
+  if (!newsItems.length) return;
+  openDetail("news-current", null);
+});
+
+// Tap current weather (in the header) to open weather detail for today.
+document.getElementById("cur-weather").addEventListener("click", () => {
+  if (!weatherData) return;
+  openDetail("weather", { dayIdx: 0 });
+});
+
+// Detail-view interactions: back button + reset inactivity on any tap.
+document.getElementById("detail-back").addEventListener("click", closeDetail);
+document.getElementById("detail-view").addEventListener("click", () => {
+  if (currentView === "detail") resetInactivityTimer();
+});
 
 setupSecretTap();
 

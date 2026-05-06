@@ -1,4 +1,5 @@
 """Fetches RSS news feeds and extracts headline images for display."""
+import html
 import logging
 import re
 from datetime import datetime
@@ -18,6 +19,16 @@ class NewsService:
         self._items: list[dict] = []
         self._lock = Lock()
         self._last_refresh: datetime | None = None
+
+    @staticmethod
+    def _clean_text(s) -> str:
+        if not s:
+            return ""
+        if isinstance(s, list) and s:
+            s = s[0].get("value", "") if isinstance(s[0], dict) else str(s[0])
+        s = re.sub(r"<[^>]+>", " ", str(s))
+        s = html.unescape(s)
+        return re.sub(r"\s+", " ", s).strip()
 
     @staticmethod
     def _extract_image(entry) -> str | None:
@@ -78,10 +89,14 @@ class NewsService:
                     title = (entry.get("title") or "").strip()
                     if not title:
                         continue
+                    summary = self._clean_text(
+                        entry.get("summary") or entry.get("description")
+                    )[:600]
                     all_items.append(
                         {
                             "source": name,
                             "title": title,
+                            "summary": summary,
                             "link": entry.get("link", ""),
                             "image": self._extract_image(entry),
                             "published": pub_iso,
