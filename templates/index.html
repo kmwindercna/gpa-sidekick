@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grandpa's Sidekick</title>
+  <meta name="viewport" content="width=800, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    :root {
+      --bg: {{ theme.bg }};
+      --surface: {{ theme.surface }};
+      --border: {{ theme.border }};
+      --text: {{ theme.text }};
+      --muted: {{ theme.muted }};
+      --subtle: {{ theme.subtle }};
+      --accent: {{ theme.accent }};
+      --warm: {{ theme.warm }};
+      --cool: {{ theme.cool }};
+      --good: {{ theme.good }};
+      --good-strong: {{ theme.good_strong }};
+    }
+  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div id="app">
+    <header id="top-bar">
+      <div class="header-left">
+        <div id="clock">--:-- --</div>
+        <div id="date">Loading…</div>
+      </div>
+      <div class="header-right">
+        <div id="cur-weather">
+          <span id="cur-emoji">🌡️</span>
+          <div class="cur-stack">
+            <span id="cur-temp">--°</span>
+            <span id="cur-label">{{ config.weather.label or '' }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="calendar-panel" class="panel">
+        <h2>Today &amp; Upcoming</h2>
+        <div id="event-list">Loading…</div>
+      </section>
+
+      <section id="news-panel" class="panel">
+        <h2 id="news-header">News <span class="src-name" id="news-source">—</span></h2>
+        <div id="news-card">
+          <div id="news-image"></div>
+          <div id="news-title">Loading…</div>
+        </div>
+        <div id="news-dots"></div>
+      </section>
+    </main>
+
+    <footer id="forecast-strip">
+      <div id="forecast-days">Loading…</div>
+    </footer>
+
+    <div id="status-bar"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+/* Grandpa's Sidekick — sized for the official 7" Pi touchscreen (800x480).
+   Colors come from CSS custom properties set in templates/index.html via the
+   weekly theme picker (services/themes.py). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 800px;
+  height: 480px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: none;
+}
+
+#app {
+  display: grid;
+  grid-template-rows: 64px 1fr 88px;
+  height: 480px;
+}
+
+/* --- Header / Top Bar --- */
+#top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: linear-gradient(180deg, var(--surface), var(--bg));
+  border-bottom: 1px solid var(--border);
+}
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+#clock {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  line-height: 1;
+}
+#date {
+  font-size: 17px;
+  color: var(--subtle);
+}
+.header-right { display: flex; align-items: center; gap: 8px; }
+#cur-weather {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#cur-emoji { font-size: 36px; line-height: 1; }
+.cur-stack { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; }
+#cur-temp { font-size: 32px; font-weight: 700; color: var(--text); }
+#cur-label { font-size: 12px; color: var(--muted); }
+
+/* --- Main grid --- */
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  overflow: hidden;
+  min-height: 0;
+}
+.panel {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 8px 12px 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.panel h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+/* --- Calendar / Events --- */
+#event-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.day-divider {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 6px 0 2px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+}
+.day-divider:first-child { margin-top: 0; }
+.day-divider.today { color: var(--accent); }
+.event {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.event:last-child { border-bottom: none; }
+.event-time {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.event-summary {
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.event.holiday .event-summary { color: var(--good); }
+.event.holiday .event-time { color: var(--good-strong); font-size: 14px; }
+.event.holiday .event-time::before { content: "🎉 "; }
+.event.empty {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  padding: 12px 0;
+  display: block;
+}
+
+/* --- News --- */
+#news-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+#news-header .src-name {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+#news-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+#news-image {
+  flex: 1;
+  background: var(--bg) center/cover no-repeat;
+  border-radius: 8px;
+  min-height: 110px;
+  transition: opacity 0.25s ease;
+}
+#news-image.no-image {
+  background: var(--border);
+}
+#news-title {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--text);
+  max-height: 56px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+#news-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 2px;
+  height: 10px;
+}
+.dot {
+  width: 6px; height: 6px;
+  background: var(--border);
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.dot.active {
+  background: var(--accent);
+  width: 10px;
+  border-radius: 4px;
+}
+
+/* --- Forecast Strip --- */
+#forecast-strip {
+  background: linear-gradient(0deg, var(--surface), var(--bg));
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+}
+#forecast-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+.fday {
+  background: var(--surface);
+  border-radius: 8px;
+  text-align: center;
+  padding: 4px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.fday-name { font-size: 11px; color: var(--subtle); font-weight: 600; }
+.fday-emoji { font-size: 22px; line-height: 1; }
+.fday-temps { font-size: 12px; }
+.fday-high { color: var(--warm); font-weight: 700; }
+.fday-low { color: var(--cool); margin-left: 4px; }
+
+/* --- Status (small, bottom corner) --- */
+#status-bar {
+  position: absolute;
+  bottom: 1px;
+  right: 4px;
+  font-size: 9px;
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0.6;
+}
