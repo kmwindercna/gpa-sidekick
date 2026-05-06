@@ -47,7 +47,7 @@ CHROMIUM_FLAGS=(
   --disable-infobars
   --no-first-run
   --start-fullscreen
-  --window-size=800,480
+  --window-size=1024,600
   --window-position=0,0
   --check-for-update-interval=31536000
   --disable-features=Translate,InfiniteSessionRestore

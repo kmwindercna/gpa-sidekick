@@ -137,7 +137,7 @@ async function loadCalendar() {
 
     let currentDayKey = null;
     let shown = 0;
-    const MAX = 9;
+    const MAX = 12;
     const todayKey = localDayKey(new Date());
 
     for (const item of items) {
@@ -360,27 +360,28 @@ function applySeasonalEffect() {
   );
 
   let kind = null, chars = [], count = 0;
-  if (birthdaysToday.length) { kind = "fx-confetti"; chars = ["🎉","🎊","🎈","🎂","✨"]; count = 14; }
-  else if (month === 12)             { kind = "fx-snow";    chars = ["❄","❄️","❅","❆"];  count = 14; }
-  else if (month === 10)             { kind = "fx-leaves";  chars = ["🍂","🍁","🌰"];      count = 10; }
-  else if (month === 2 && day === 14) { kind = "fx-hearts";  chars = ["❤️","💕","💖","💗"]; count = 12; }
-  else if (month === 7 && day === 4)  { kind = "fx-fireworks"; chars = ["✨","🎆","🎇"];   count = 8;  }
+  if (birthdaysToday.length) { kind = "fx-confetti"; chars = ["🎉","🎊","🎈","🎂","✨"]; count = 18; }
+  else if (month === 12)             { kind = "fx-snow";    chars = ["❄","❄️","❅","❆"];  count = 18; }
+  else if (month === 10)             { kind = "fx-leaves";  chars = ["🍂","🍁","🌰"];      count = 14; }
+  else if (month === 2 && day === 14) { kind = "fx-hearts";  chars = ["❤️","💕","💖","💗"]; count = 16; }
+  else if (month === 7 && day === 4)  { kind = "fx-fireworks"; chars = ["✨","🎆","🎇"];   count = 10; }
 
   const wrap = document.getElementById("sparkles");
   wrap.innerHTML = "";
   if (!kind) return;
 
   document.body.classList.add(kind);
+  const W = window.innerWidth || 1024;
   for (let i = 0; i < count; i++) {
     const span = document.createElement("span");
     span.className = "fx";
     span.textContent = chars[Math.floor(Math.random() * chars.length)];
-    span.style.left = Math.floor(Math.random() * 800) + "px";
-    const duration = 8 + Math.random() * 14;
+    span.style.left = Math.floor(Math.random() * W) + "px";
+    const duration = 9 + Math.random() * 16;
     const delay    = -Math.random() * duration;
     span.style.animationDuration = duration.toFixed(2) + "s";
     span.style.animationDelay = delay.toFixed(2) + "s";
-    span.style.fontSize = (16 + Math.random() * 14).toFixed(0) + "px";
+    span.style.fontSize = (20 + Math.random() * 18).toFixed(0) + "px";
     wrap.appendChild(span);
   }
 }

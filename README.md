@@ -4,7 +4,7 @@ A simple, reliable touchscreen dashboard for a Raspberry Pi running Raspberry Pi
 Built as a replacement for MagicMirror — one Python process, one config file, no
 flaky Node modules.
 
-**Designed for the official 7" Pi touchscreen (800×480).**
+**Designed for a 10" Pi touchscreen at 1024×600.**
 
 Shows:
 - Big clock + date

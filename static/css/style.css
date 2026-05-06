@@ -1,11 +1,11 @@
-/* Grandpa's Sidekick — sized for the official 7" Pi touchscreen (800x480).
+/* Grandpa's Sidekick — sized for a 10" Pi touchscreen (1024×600).
    Colors come from CSS custom properties set in templates/index.html via the
    weekly theme picker (services/themes.py). */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  width: 800px;
-  height: 480px;
+  width: 1024px;
+  height: 600px;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
@@ -27,8 +27,8 @@ html, body {
 
 #app {
   display: grid;
-  grid-template-rows: 64px 1fr 22px 78px;
-  height: 480px;
+  grid-template-rows: 80px 1fr 30px 116px;
+  height: 600px;
 }
 
 /* --- Header / Top Bar --- */
@@ -36,7 +36,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 20px;
   background: linear-gradient(180deg, var(--surface), var(--bg));
   border-bottom: 1px solid var(--border);
   position: relative;
@@ -45,53 +45,62 @@ html, body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
   min-width: 0;
 }
 #clock {
-  font-size: 38px;
+  font-size: 52px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   color: var(--accent);
   line-height: 1;
   cursor: pointer;
   outline: none;
 }
-.header-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
-#greeting { font-size: 14px; color: var(--good); font-weight: 600; min-height: 17px; }
-#date { font-size: 15px; color: var(--subtle); }
+.header-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+#greeting { font-size: 17px; color: var(--good); font-weight: 600; min-height: 21px; }
+#date { font-size: 19px; color: var(--subtle); }
 
-.header-right { display: flex; align-items: center; gap: 8px; }
-#cur-weather { display: flex; align-items: center; gap: 10px; }
-#cur-emoji { font-size: 36px; line-height: 1; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+#cur-weather {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+#cur-weather:active { background: var(--border); }
+#cur-emoji { font-size: 52px; line-height: 1; }
 .cur-stack { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; }
-#cur-temp { font-size: 32px; font-weight: 700; color: var(--text); }
-#cur-label { font-size: 12px; color: var(--muted); }
+#cur-temp { font-size: 44px; font-weight: 700; color: var(--text); line-height: 1; }
+#cur-label { font-size: 14px; color: var(--muted); margin-top: 2px; }
 
 /* --- Main grid --- */
 main {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 8px;
+  gap: 12px;
+  padding: 12px;
   overflow: hidden;
   min-height: 0;
 }
 .panel {
   background: var(--surface);
-  border-radius: 12px;
-  padding: 8px 12px 10px;
+  border-radius: 14px;
+  padding: 12px 16px 14px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 .panel h2 {
-  font-size: 13px;
+  font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   font-weight: 700;
 }
 
@@ -103,49 +112,49 @@ main {
   min-height: 0;
 }
 .day-divider {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   text-transform: uppercase;
-  margin: 6px 0 2px;
-  letter-spacing: 1.2px;
+  margin: 8px 0 3px;
+  letter-spacing: 1.3px;
   font-weight: 700;
 }
 .day-divider:first-child { margin-top: 0; }
 .day-divider.today { color: var(--accent); }
 .event {
   display: grid;
-  grid-template-columns: 78px 1fr;
-  gap: 10px;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
   align-items: center;
-  padding: 4px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
 }
 .event:last-child { border-bottom: none; }
 .event-time {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--accent);
   font-weight: 600;
   text-align: right;
   white-space: nowrap;
 }
 .event-summary {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .event.holiday .event-summary { color: var(--good); }
-.event.holiday .event-time { color: var(--good-strong); font-size: 14px; }
+.event.holiday .event-time { color: var(--good-strong); font-size: 15px; }
 .event.holiday .event-time::before { content: "🎉 "; }
 .event.birthday .event-summary { color: var(--accent); font-weight: 700; }
-.event.birthday .event-time { color: var(--warm); font-size: 14px; }
+.event.birthday .event-time { color: var(--warm); font-size: 15px; }
 .event.birthday .event-time::before { content: "🎂 "; }
 .event.empty {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--muted);
   text-align: center;
-  padding: 12px 0;
+  padding: 16px 0;
   display: block;
 }
 
@@ -157,7 +166,7 @@ main {
   gap: 8px;
 }
 #news-header .src-name {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--accent);
   text-transform: none;
   letter-spacing: 0.5px;
@@ -167,7 +176,7 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
   min-height: 0;
@@ -175,34 +184,30 @@ main {
 #news-image {
   flex: 1;
   background: var(--bg) center/cover no-repeat;
-  border-radius: 8px;
-  min-height: 90px;
+  border-radius: 10px;
+  min-height: 180px;
   transition: opacity 0.25s ease;
 }
-#news-image.no-image {
-  background: var(--border);
-}
+#news-image.no-image { background: var(--border); }
 #news-title {
-  font-size: 15px;
-  line-height: 1.25;
+  font-size: 19px;
+  line-height: 1.3;
   font-weight: 600;
   color: var(--text);
-  max-height: 56px;
+  max-height: 76px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
-/* On-this-day card variant */
 .news-mode-otd #news-image { background-color: var(--surface); }
 .news-mode-otd #news-source { color: var(--good); }
-/* Birthday card variant */
 .news-mode-birthday #news-image {
   background: radial-gradient(circle at 50% 40%, var(--warm), var(--bg) 70%);
 }
 .news-mode-birthday #news-title {
   text-align: center;
-  font-size: 22px;
+  font-size: 28px;
   -webkit-line-clamp: 2;
 }
 .news-mode-birthday #news-source { color: var(--warm); }
@@ -210,20 +215,20 @@ main {
 #news-dots {
   display: flex;
   justify-content: center;
-  gap: 4px;
-  margin-top: 2px;
-  height: 10px;
+  gap: 5px;
+  margin-top: 4px;
+  height: 12px;
 }
 .dot {
-  width: 6px; height: 6px;
+  width: 8px; height: 8px;
   background: var(--border);
   border-radius: 50%;
   transition: background 0.2s, width 0.2s;
 }
 .dot.active {
   background: var(--accent);
-  width: 10px;
-  border-radius: 4px;
+  width: 14px;
+  border-radius: 5px;
 }
 
 /* --- Quote strip (between main and forecast) --- */
@@ -231,8 +236,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 16px;
-  font-size: 12px;
+  padding: 0 24px;
+  font-size: 14px;
   font-style: italic;
   color: var(--muted);
   white-space: nowrap;
@@ -244,7 +249,7 @@ main {
 #quote-strip .qauthor {
   color: var(--subtle);
   font-style: normal;
-  margin-left: 6px;
+  margin-left: 8px;
 }
 #quote-strip .qauthor::before { content: "— "; }
 
@@ -254,41 +259,41 @@ main {
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  padding: 4px 6px;
+  padding: 8px 12px;
 }
 #forecast-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 8px;
   width: 100%;
 }
 .fday {
   background: var(--surface);
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
-  padding: 3px 2px;
+  padding: 6px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 2px;
   position: relative;
 }
-.fday-name { font-size: 11px; color: var(--subtle); font-weight: 600; }
-.fday-emoji { font-size: 20px; line-height: 1.1; }
-.fday-temps { font-size: 12px; }
+.fday-name { font-size: 13px; color: var(--subtle); font-weight: 600; }
+.fday-emoji { font-size: 32px; line-height: 1.1; }
+.fday-temps { font-size: 15px; }
 .fday-high { color: var(--warm); font-weight: 700; }
-.fday-low { color: var(--cool); margin-left: 4px; }
+.fday-low { color: var(--cool); margin-left: 6px; }
 .fday-badge {
   position: absolute;
-  top: -6px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: 10px;
   background: var(--accent);
   color: var(--bg);
   font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 8px;
   white-space: nowrap;
   letter-spacing: 0.3px;
 }
@@ -299,9 +304,9 @@ main {
 /* --- Status (small, bottom corner) --- */
 #status-bar {
   position: absolute;
-  bottom: 1px;
-  right: 4px;
-  font-size: 9px;
+  bottom: 2px;
+  right: 6px;
+  font-size: 10px;
   color: var(--muted);
   pointer-events: none;
   opacity: 0.5;
@@ -309,89 +314,13 @@ main {
 }
 
 /* ====================================================================
-   SEASONAL SPARKLES OVERLAY
-   ==================================================================== */
-#sparkles {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 5;
-}
-#sparkles .fx {
-  position: absolute;
-  font-size: 20px;
-  opacity: 0;
-  will-change: transform, opacity;
-  user-select: none;
-}
-
-/* Snowflakes — December */
-body.fx-snow #sparkles .fx {
-  animation: snow-fall linear infinite;
-  color: #ffffff;
-  text-shadow: 0 0 4px rgba(255,255,255,0.5);
-}
-@keyframes snow-fall {
-  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: 0.85; }
-  90% { opacity: 0.85; }
-  100% { transform: translate3d(20px, 510px, 0) rotate(360deg); opacity: 0; }
-}
-
-/* Falling leaves — October */
-body.fx-leaves #sparkles .fx {
-  animation: leaf-fall linear infinite;
-}
-@keyframes leaf-fall {
-  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
-  15% { opacity: 0.9; }
-  90% { opacity: 0.9; }
-  100% { transform: translate3d(80px, 510px, 0) rotate(540deg); opacity: 0; }
-}
-
-/* Hearts — Feb 14 */
-body.fx-hearts #sparkles .fx {
-  animation: heart-rise ease-in infinite;
-}
-@keyframes heart-rise {
-  0% { transform: translate3d(0, 510px, 0) scale(0.6); opacity: 0; }
-  20% { opacity: 0.9; }
-  90% { opacity: 0.9; }
-  100% { transform: translate3d(20px, -40px, 0) scale(1.1); opacity: 0; }
-}
-
-/* Fireworks — July 4 */
-body.fx-fireworks #sparkles .fx {
-  animation: firework-pop ease-out infinite;
-  font-size: 28px;
-}
-@keyframes firework-pop {
-  0% { transform: scale(0.2); opacity: 0; }
-  20% { opacity: 1; }
-  60% { transform: scale(2.0); opacity: 0.8; }
-  100% { transform: scale(2.5); opacity: 0; }
-}
-
-/* Birthday confetti — when today is in birthdays.today */
-body.fx-confetti #sparkles .fx {
-  animation: confetti-fall linear infinite;
-}
-@keyframes confetti-fall {
-  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translate3d(60px, 510px, 0) rotate(720deg); opacity: 0; }
-}
-
-/* ====================================================================
    TAPPABLE CUES (home view)
    ==================================================================== */
-#news-panel, .event:not(.empty), .fday, #cur-weather {
+#news-panel, .event:not(.empty), .fday {
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.event:not(.empty):active { background: var(--border); border-radius: 6px; }
+.event:not(.empty):active { background: var(--border); border-radius: 8px; }
 .fday:active { transform: scale(0.94); }
 #news-panel:active { background: var(--border); }
 
@@ -406,8 +335,8 @@ body.fx-confetti #sparkles .fx {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  padding: 10px 12px 6px;
-  gap: 8px;
+  padding: 16px 20px 8px;
+  gap: 14px;
   animation: detail-slide-in 0.2s ease-out;
 }
 #detail-view.hidden { display: none; }
@@ -419,24 +348,24 @@ body.fx-confetti #sparkles .fx {
 .detail-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex-shrink: 0;
 }
 #detail-back {
   background: var(--accent);
   color: var(--bg);
   border: none;
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 18px;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 22px;
   font-weight: 800;
   cursor: pointer;
   letter-spacing: 0.3px;
-  box-shadow: 0 2px 0 var(--border);
+  box-shadow: 0 3px 0 var(--border);
 }
-#detail-back:active { transform: translateY(1px); box-shadow: none; }
+#detail-back:active { transform: translateY(2px); box-shadow: none; }
 #detail-title {
-  font-size: 17px;
+  font-size: 19px;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -446,14 +375,14 @@ body.fx-confetti #sparkles .fx {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#detail-nav { display: flex; gap: 6px; }
+#detail-nav { display: flex; gap: 8px; }
 #detail-nav button {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -464,13 +393,13 @@ body.fx-confetti #sparkles .fx {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   min-height: 0;
 }
 
 /* Inactivity countdown — thin bar at the very bottom */
 #detail-timer {
-  height: 3px;
+  height: 4px;
   background: var(--accent);
   width: 100%;
   transform-origin: left center;
@@ -482,17 +411,17 @@ body.fx-confetti #sparkles .fx {
 /* --- News detail --- */
 .dn-image {
   width: 100%;
-  height: 220px;
+  height: 300px;
   background: center/cover no-repeat var(--surface);
-  border-radius: 12px;
+  border-radius: 14px;
   flex-shrink: 0;
 }
 .dn-image.no-image { display: none; }
 .dn-meta {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  font-size: 12px;
+  gap: 14px;
+  font-size: 14px;
   color: var(--muted);
 }
 .dn-source {
@@ -500,18 +429,18 @@ body.fx-confetti #sparkles .fx {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .dn-title {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--text);
 }
 .dn-summary {
-  font-size: 15px;
+  font-size: 18px;
   color: var(--subtle);
-  line-height: 1.45;
+  line-height: 1.5;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -524,7 +453,7 @@ body.fx-confetti #sparkles .fx {
 
 /* --- Weather detail --- */
 .dw-day {
-  font-size: 22px;
+  font-size: 26px;
   color: var(--accent);
   font-weight: 800;
   text-align: center;
@@ -533,47 +462,47 @@ body.fx-confetti #sparkles .fx {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  margin-top: 4px;
+  gap: 24px;
+  margin-top: 6px;
 }
-.dw-emoji { font-size: 92px; line-height: 1; }
-.dw-cond-text { font-size: 22px; color: var(--text); font-weight: 600; }
+.dw-emoji { font-size: 130px; line-height: 1; }
+.dw-cond-text { font-size: 28px; color: var(--text); font-weight: 600; }
 .dw-temps {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin-top: 6px;
+  gap: 60px;
+  margin-top: 10px;
 }
 .dw-temp { display: flex; flex-direction: column; align-items: center; }
 .dw-temp .lab {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
-.dw-temp .val { font-size: 50px; font-weight: 800; line-height: 1; }
+.dw-temp .val { font-size: 70px; font-weight: 800; line-height: 1; }
 .dw-temp.high .val { color: var(--warm); }
 .dw-temp.low  .val { color: var(--cool); }
 .dw-meta-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 14px;
 }
 .dw-stat {
   background: var(--surface);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: 12px;
+  padding: 12px 14px;
   text-align: center;
 }
 .dw-stat .lab {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 .dw-stat .val {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--text);
 }
@@ -582,45 +511,115 @@ body.fx-confetti #sparkles .fx {
 
 /* --- Event detail --- */
 .de-day {
-  font-size: 17px;
+  font-size: 19px;
   color: var(--accent);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
 .de-time {
-  font-size: 36px;
+  font-size: 48px;
   font-weight: 800;
   color: var(--warm);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .de-title {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.3;
-  margin-top: 12px;
+  margin-top: 18px;
 }
 .de-location {
-  font-size: 18px;
+  font-size: 21px;
   color: var(--subtle);
-  margin-top: 14px;
+  margin-top: 18px;
 }
 .de-location::before { content: "📍 "; }
 .de-tag {
   display: inline-block;
-  font-size: 12px;
+  font-size: 13px;
   background: var(--good);
   color: var(--bg);
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: 22px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .de-tag.holiday { background: var(--good-strong); }
 .de-tag.birthday { background: var(--warm); }
+
+/* ====================================================================
+   SEASONAL SPARKLES OVERLAY
+   ==================================================================== */
+#sparkles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+#sparkles .fx {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0;
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+/* Snowflakes — December */
+body.fx-snow #sparkles .fx {
+  animation: snow-fall linear infinite;
+  color: #ffffff;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+@keyframes snow-fall {
+  0%   { transform: translate3d(0, -40px, 0) rotate(0deg);   opacity: 0; }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.85; }
+  100% { transform: translate3d(30px, 100vh, 0) rotate(360deg); opacity: 0; }
+}
+
+/* Falling leaves — October */
+body.fx-leaves #sparkles .fx { animation: leaf-fall linear infinite; }
+@keyframes leaf-fall {
+  0%   { transform: translate3d(0, -40px, 0) rotate(0deg);   opacity: 0; }
+  15%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { transform: translate3d(100px, 100vh, 0) rotate(540deg); opacity: 0; }
+}
+
+/* Hearts — Feb 14 */
+body.fx-hearts #sparkles .fx { animation: heart-rise ease-in infinite; }
+@keyframes heart-rise {
+  0%   { transform: translate3d(0, 100vh, 0) scale(0.6); opacity: 0; }
+  20%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { transform: translate3d(30px, -50px, 0) scale(1.1); opacity: 0; }
+}
+
+/* Fireworks — July 4 */
+body.fx-fireworks #sparkles .fx {
+  animation: firework-pop ease-out infinite;
+  font-size: 34px;
+}
+@keyframes firework-pop {
+  0%   { transform: scale(0.2); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { transform: scale(2.0); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Birthday confetti */
+body.fx-confetti #sparkles .fx { animation: confetti-fall linear infinite; }
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -40px, 0) rotate(0deg);   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate3d(80px, 100vh, 0) rotate(720deg); opacity: 0; }
+}
 
 /* ====================================================================
    SECRET TAP MENU
@@ -642,16 +641,16 @@ body.fx-confetti #sparkles .fx {
 .secret-card {
   background: var(--surface);
   border: 2px solid var(--accent);
-  border-radius: 16px;
-  padding: 22px 28px;
+  border-radius: 20px;
+  padding: 28px 36px;
   text-align: center;
-  max-width: 600px;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+  max-width: 760px;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
 }
 .secret-emoji {
-  font-size: 48px;
+  font-size: 64px;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   animation: secret-pulse 1.4s ease-in-out infinite;
 }
 @keyframes secret-pulse {
@@ -659,21 +658,21 @@ body.fx-confetti #sparkles .fx {
   50%      { transform: scale(1.15); }
 }
 .secret-note {
-  font-size: 22px;
+  font-size: 28px;
   color: var(--accent);
   font-weight: 700;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   line-height: 1.3;
 }
 .secret-meta {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--subtle);
-  line-height: 1.7;
+  line-height: 1.8;
 }
 .secret-meta .label { color: var(--muted); }
 .secret-tap-hint {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
-  margin-top: 14px;
+  margin-top: 18px;
   font-style: italic;
 }
