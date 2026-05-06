@@ -3,6 +3,7 @@ import json
 import logging
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template
@@ -12,6 +13,9 @@ from services.news import NewsService
 from services.holidays_svc import HolidaysService
 from services.weather import WeatherService
 from services.themes import pick_theme
+from services.birthdays import BirthdaysService
+from services.quotes import QuotesService
+from services.onthisday import OnThisDayService
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,6 +33,7 @@ with open(CONFIG_PATH) as f:
     config = json.load(f)
 
 app = Flask(__name__)
+APP_START_TS = time.time()
 
 calendar_svc = CalendarService(config.get("calendar_ical_url", ""))
 news_svc = NewsService(config.get("news_feeds", []))
@@ -42,6 +47,9 @@ weather_svc = WeatherService(
     weather_cfg.get("longitude"),
     weather_cfg.get("timezone", "America/New_York"),
 )
+birthdays_svc = BirthdaysService(config.get("birthdays", []))
+quotes_svc = QuotesService()
+onthisday_svc = OnThisDayService()
 
 
 def refresh_loop():
@@ -51,6 +59,7 @@ def refresh_loop():
             ("calendar", calendar_svc),
             ("news", news_svc),
             ("weather", weather_svc),
+            ("onthisday", onthisday_svc),
         ):
             try:
                 svc.refresh()
@@ -64,12 +73,16 @@ threading.Thread(target=refresh_loop, daemon=True).start()
 
 @app.route("/")
 def index():
-    return render_template("index.html", config=config, theme=pick_theme())
-
-
-@app.route("/api/theme")
-def api_theme():
-    return jsonify(pick_theme())
+    return render_template(
+        "index.html",
+        config=config,
+        theme=pick_theme(),
+        names=config.get("names") or ["Friend"],
+        about_note=config.get(
+            "about_note",
+            "Hi Grandpa! Hope you're having a great day. — Love, Kyle ❤️",
+        ),
+    )
 
 
 @app.route("/api/calendar")
@@ -90,6 +103,41 @@ def api_holidays():
 @app.route("/api/weather")
 def api_weather():
     return jsonify(weather_svc.get())
+
+
+@app.route("/api/theme")
+def api_theme():
+    return jsonify(pick_theme())
+
+
+@app.route("/api/birthdays")
+def api_birthdays():
+    return jsonify(birthdays_svc.get())
+
+
+@app.route("/api/quote")
+def api_quote():
+    return jsonify(quotes_svc.get())
+
+
+@app.route("/api/onthisday")
+def api_onthisday():
+    return jsonify(onthisday_svc.get())
+
+
+@app.route("/api/system")
+def api_system():
+    """Used by the secret tap menu."""
+    uptime_seconds = int(time.time() - APP_START_TS)
+    return jsonify(
+        {
+            "uptime_seconds": uptime_seconds,
+            "started_at": datetime.fromtimestamp(APP_START_TS).isoformat(),
+            "now": datetime.now().isoformat(),
+            "weather_label": weather_cfg.get("label", ""),
+            "theme": pick_theme()["name"],
+        }
+    )
 
 
 @app.route("/healthz")

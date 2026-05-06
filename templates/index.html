@@ -20,13 +20,22 @@
     }
   </style>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    window.__GPS_CONFIG__ = {
+      names: {{ names|tojson }},
+      aboutNote: {{ about_note|tojson }}
+    };
+  </script>
 </head>
 <body>
   <div id="app">
     <header id="top-bar">
       <div class="header-left">
-        <div id="clock">--:-- --</div>
-        <div id="date">Loading…</div>
+        <div id="clock" tabindex="0">--:-- --</div>
+        <div class="header-text">
+          <div id="greeting"></div>
+          <div id="date">Loading…</div>
+        </div>
       </div>
       <div class="header-right">
         <div id="cur-weather">
@@ -55,11 +64,26 @@
       </section>
     </main>
 
+    <div id="quote-strip"></div>
+
     <footer id="forecast-strip">
       <div id="forecast-days">Loading…</div>
     </footer>
 
     <div id="status-bar"></div>
+  </div>
+
+  <!-- Seasonal sparkles overlay (positioned absolutely; never blocks taps) -->
+  <div id="sparkles" aria-hidden="true"></div>
+
+  <!-- Secret tap menu (hidden until clock tapped 5x) -->
+  <div id="secret-menu" class="hidden" role="dialog" aria-hidden="true">
+    <div class="secret-card">
+      <div class="secret-emoji">❤️</div>
+      <div class="secret-note" id="secret-note">A note from Kyle</div>
+      <div class="secret-meta" id="secret-meta">…</div>
+      <div class="secret-tap-hint">tap anywhere to close</div>
+    </div>
   </div>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>

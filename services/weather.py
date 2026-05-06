@@ -94,6 +94,31 @@ class WeatherService:
                 }
             )
 
+        # Annotate superlatives across the 7-day window.
+        if days:
+            hottest = max(range(len(days)), key=lambda i: days[i]["high"])
+            coldest = min(range(len(days)), key=lambda i: days[i]["low"])
+            wettest = max(
+                range(len(days)),
+                key=lambda i: days[i].get("precip_chance") or -1,
+            )
+            wettest_chance = days[wettest].get("precip_chance") or 0
+            for i, d in enumerate(days):
+                d["superlative"] = None
+            days[hottest]["superlative"] = "Hottest"
+            days[coldest]["superlative"] = "Coldest"
+            # Only call out a "rainiest" day if it's actually wet (>= 40%).
+            if wettest_chance >= 40 and wettest not in (hottest, coldest):
+                days[wettest]["superlative"] = "Rainiest"
+            # Snow chance? Open-Meteo doesn't expose snow probability separately;
+            # if any forecast day has a snow weather code, flag the first one.
+            SNOW_CODES = {71, 73, 75, 77, 85, 86}
+            for i, d in enumerate(days):
+                code = (daily.get("weather_code", []) or [None])[i]
+                if code in SNOW_CODES and not d["superlative"]:
+                    d["superlative"] = "Snow!"
+                    break
+
         result = {
             "current": {
                 "temp": round(cur.get("temperature_2m", 0)),

@@ -92,7 +92,16 @@ Everything is in `config.json`. The example file documents the shape:
     "latitude":  33.8388,
     "longitude": -83.9013,
     "timezone":  "America/New_York"
-  }
+  },
+
+  "names": ["Grandpa", "Grumpy"],
+
+  "birthdays": [
+    { "date": "06-12", "name": "Granddaughter Susie" },
+    { "date": "11-04", "name": "Grumpy" }
+  ],
+
+  "about_note": "Hi Grandpa! Hope you're having a great day. — Love, Kyle ❤️"
 }
 ```
 
@@ -101,6 +110,34 @@ After editing, restart the service:
 ```bash
 sudo systemctl restart gpa-sidekick
 ```
+
+### Easter eggs (configurable)
+
+| Field | What it does |
+|---|---|
+| `names` | Array of nicknames. The header greeting (*"Good morning, Grumpy"*) randomly picks one each minute, rotating phrase by time of day. |
+| `birthdays` | Array of `{ "date": "MM-DD", "name": "..." }`. Birthdays show up in the calendar list with 🎂, and on the actual day a celebration card cycles into the news rotation + confetti rains across the screen. Add as many as you like. |
+| `about_note` | The personal message shown when the clock is tapped 5 times in a row (the secret tap menu). |
+
+### Built-in seasonal flair (no config needed)
+
+- ❄️ **Snowflakes fall** through December
+- 🍂 **Leaves drift** in October
+- 💕 **Hearts rise** on February 14
+- 🎆 **Fireworks burst** on July 4
+- 🎉 **Confetti** on any configured birthday
+
+### Other always-on touches
+
+- **Weekly color theme** — picks one of 14 palettes per ISO week, deterministic so it's stable Monday → Sunday but new every week. Theme name is shown faintly in the bottom-right corner.
+- **Daily wisdom** — a folksy quote (Mark Twain, Will Rogers, Yogi Berra, etc.) appears between the dashboard and the forecast strip; rotates daily.
+- **On This Day in history** — Wikipedia's "on this day" picks one notable event for today's date, mixed into the news rotation with its own image.
+- **Weather superlatives** — the 7-day forecast labels the *Hottest*, *Coldest*, *Rainiest*, and any *Snow!* day with a small badge.
+- **Personal greeting** — *"Good morning, Grandpa"* / *"Good afternoon, Grumpy"* / etc., name picked at random from `config.names`.
+
+### The secret tap menu
+
+Tap the clock **5 times in 3 seconds**. A full-screen card opens showing your `about_note`, the active theme, the configured weather location, how long the dashboard has been running, and when it last started. Tap anywhere to dismiss.
 
 ### Adjusting RSS feeds
 

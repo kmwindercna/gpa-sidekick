@@ -2,18 +2,30 @@
   "host": "127.0.0.1",
   "port": 5000,
   "refresh_seconds": 600,
+
   "calendar_ical_url": "PASTE_YOUR_GOOGLE_CALENDAR_PRIVATE_ICAL_URL_HERE",
+
   "news_feeds": [
     { "name": "Fox 5 Atlanta", "url": "https://www.fox5atlanta.com/rss" },
     { "name": "Fox News", "url": "https://moxie.foxnews.com/google-publisher/latest.xml" },
     { "name": "Atlanta News First", "url": "https://www.atlantanewsfirst.com/arc/outboundfeeds/rss/?outputType=xml" }
   ],
+
   "holiday_country": "US",
   "holiday_subdiv": "GA",
+
   "weather": {
     "label": "Loganville, GA",
     "latitude": 33.8388,
     "longitude": -83.9013,
     "timezone": "America/New_York"
-  }
+  },
+
+  "names": ["Grandpa", "Grumpy"],
+
+  "birthdays": [
+    { "date": "MM-DD", "name": "Example Person — replace me" }
+  ],
+
+  "about_note": "Hi Grandpa! Hope you're having a great day. — Love, Kyle ❤️"
 }

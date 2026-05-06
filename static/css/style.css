@@ -17,7 +17,7 @@ html, body {
 
 #app {
   display: grid;
-  grid-template-rows: 64px 1fr 88px;
+  grid-template-rows: 64px 1fr 22px 78px;
   height: 480px;
 }
 
@@ -29,30 +29,30 @@ html, body {
   padding: 0 14px;
   background: linear-gradient(180deg, var(--surface), var(--bg));
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
 }
 .header-left {
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
 }
 #clock {
-  font-size: 40px;
+  font-size: 38px;
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--accent);
   line-height: 1;
+  cursor: pointer;
+  outline: none;
 }
-#date {
-  font-size: 17px;
-  color: var(--subtle);
-}
+.header-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+#greeting { font-size: 14px; color: var(--good); font-weight: 600; min-height: 17px; }
+#date { font-size: 15px; color: var(--subtle); }
+
 .header-right { display: flex; align-items: center; gap: 8px; }
-#cur-weather {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+#cur-weather { display: flex; align-items: center; gap: 10px; }
 #cur-emoji { font-size: 36px; line-height: 1; }
 .cur-stack { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; }
 #cur-temp { font-size: 32px; font-weight: 700; color: var(--text); }
@@ -128,6 +128,9 @@ main {
 .event.holiday .event-summary { color: var(--good); }
 .event.holiday .event-time { color: var(--good-strong); font-size: 14px; }
 .event.holiday .event-time::before { content: "🎉 "; }
+.event.birthday .event-summary { color: var(--accent); font-weight: 700; }
+.event.birthday .event-time { color: var(--warm); font-size: 14px; }
+.event.birthday .event-time::before { content: "🎂 "; }
 .event.empty {
   font-size: 14px;
   color: var(--muted);
@@ -163,7 +166,7 @@ main {
   flex: 1;
   background: var(--bg) center/cover no-repeat;
   border-radius: 8px;
-  min-height: 110px;
+  min-height: 90px;
   transition: opacity 0.25s ease;
 }
 #news-image.no-image {
@@ -180,6 +183,20 @@ main {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+/* On-this-day card variant */
+.news-mode-otd #news-image { background-color: var(--surface); }
+.news-mode-otd #news-source { color: var(--good); }
+/* Birthday card variant */
+.news-mode-birthday #news-image {
+  background: radial-gradient(circle at 50% 40%, var(--warm), var(--bg) 70%);
+}
+.news-mode-birthday #news-title {
+  text-align: center;
+  font-size: 22px;
+  -webkit-line-clamp: 2;
+}
+.news-mode-birthday #news-source { color: var(--warm); }
+
 #news-dots {
   display: flex;
   justify-content: center;
@@ -191,13 +208,35 @@ main {
   width: 6px; height: 6px;
   background: var(--border);
   border-radius: 50%;
-  transition: background 0.2s;
+  transition: background 0.2s, width 0.2s;
 }
 .dot.active {
   background: var(--accent);
   width: 10px;
   border-radius: 4px;
 }
+
+/* --- Quote strip (between main and forecast) --- */
+#quote-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+#quote-strip .qauthor {
+  color: var(--subtle);
+  font-style: normal;
+  margin-left: 6px;
+}
+#quote-strip .qauthor::before { content: "— "; }
 
 /* --- Forecast Strip --- */
 #forecast-strip {
@@ -217,17 +256,35 @@ main {
   background: var(--surface);
   border-radius: 8px;
   text-align: center;
-  padding: 4px 2px;
+  padding: 3px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 0;
+  position: relative;
 }
 .fday-name { font-size: 11px; color: var(--subtle); font-weight: 600; }
-.fday-emoji { font-size: 22px; line-height: 1; }
+.fday-emoji { font-size: 20px; line-height: 1.1; }
 .fday-temps { font-size: 12px; }
 .fday-high { color: var(--warm); font-weight: 700; }
 .fday-low { color: var(--cool); margin-left: 4px; }
+.fday-badge {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 6px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+.fday-badge.cold { background: var(--cool); color: var(--bg); }
+.fday-badge.rain { background: var(--cool); color: var(--bg); }
+.fday-badge.snow { background: var(--good); color: var(--bg); }
 
 /* --- Status (small, bottom corner) --- */
 #status-bar {
@@ -237,5 +294,138 @@ main {
   font-size: 9px;
   color: var(--muted);
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.5;
+  z-index: 3;
+}
+
+/* ====================================================================
+   SEASONAL SPARKLES OVERLAY
+   ==================================================================== */
+#sparkles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+#sparkles .fx {
+  position: absolute;
+  font-size: 20px;
+  opacity: 0;
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+/* Snowflakes — December */
+body.fx-snow #sparkles .fx {
+  animation: snow-fall linear infinite;
+  color: #ffffff;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+@keyframes snow-fall {
+  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.85; }
+  90% { opacity: 0.85; }
+  100% { transform: translate3d(20px, 510px, 0) rotate(360deg); opacity: 0; }
+}
+
+/* Falling leaves — October */
+body.fx-leaves #sparkles .fx {
+  animation: leaf-fall linear infinite;
+}
+@keyframes leaf-fall {
+  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { transform: translate3d(80px, 510px, 0) rotate(540deg); opacity: 0; }
+}
+
+/* Hearts — Feb 14 */
+body.fx-hearts #sparkles .fx {
+  animation: heart-rise ease-in infinite;
+}
+@keyframes heart-rise {
+  0% { transform: translate3d(0, 510px, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { transform: translate3d(20px, -40px, 0) scale(1.1); opacity: 0; }
+}
+
+/* Fireworks — July 4 */
+body.fx-fireworks #sparkles .fx {
+  animation: firework-pop ease-out infinite;
+  font-size: 28px;
+}
+@keyframes firework-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  20% { opacity: 1; }
+  60% { transform: scale(2.0); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Birthday confetti — when today is in birthdays.today */
+body.fx-confetti #sparkles .fx {
+  animation: confetti-fall linear infinite;
+}
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, -30px, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate3d(60px, 510px, 0) rotate(720deg); opacity: 0; }
+}
+
+/* ====================================================================
+   SECRET TAP MENU
+   ==================================================================== */
+#secret-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  cursor: pointer;
+  animation: secret-fade-in 0.25s ease;
+}
+#secret-menu.hidden { display: none; }
+@keyframes secret-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.secret-card {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 22px 28px;
+  text-align: center;
+  max-width: 600px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+}
+.secret-emoji {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 8px;
+  animation: secret-pulse 1.4s ease-in-out infinite;
+}
+@keyframes secret-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+.secret-note {
+  font-size: 22px;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+.secret-meta {
+  font-size: 13px;
+  color: var(--subtle);
+  line-height: 1.7;
+}
+.secret-meta .label { color: var(--muted); }
+.secret-tap-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 14px;
+  font-style: italic;
 }
